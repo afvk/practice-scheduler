@@ -9,10 +9,10 @@ import pandas as pd
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--variables", "-v", type=Path, default="data/variables.json")
-    parser.add_argument("--exercises", "-e", type=Path, default="data/exercises.tsv")
-    parser.add_argument("--solos", "-s", type=Path, default="data/solos.txt")
-    parser.add_argument("--repertoire", "-r", type=Path, default="data/repertoire.txt")
+    parser.add_argument("--variables", "-v", type=Path, default="examples/jazz-guitar/variables.json")
+    parser.add_argument("--exercises", "-e", type=Path, default="examples/jazz-guitar/exercises.tsv")
+    parser.add_argument("--solos", "-s", type=Path, default="examples/jazz-guitar/solos.txt")
+    parser.add_argument("--repertoire", "-r", type=Path, default="examples/jazz-guitar/repertoire.txt")
 
     return parser.parse_args()
 
