@@ -7,8 +7,12 @@ from pathlib import Path
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--variables", "-v", type=Path, default="examples/jazz-guitar/variables.json")
-    parser.add_argument("--exercises", "-e", type=Path, default="examples/jazz-guitar/exercises.tsv")
+    parser.add_argument(
+        "--variables", "-v", type=Path, default="examples/jazz-guitar/variables.json"
+    )
+    parser.add_argument(
+        "--exercises", "-e", type=Path, default="examples/jazz-guitar/exercises.tsv"
+    )
 
     return parser.parse_args()
 
@@ -32,7 +36,9 @@ def fill_template(exercise, variables):
     sampled_variables = {key: random.choice(value) for key, value in variables.items()}
     exercise = exercise.format(**sampled_variables)
 
-    print(f"{exercise} - Position: {sampled_variables['position']}, Key: {sampled_variables['key']}")
+    print(
+        f"{exercise} - Position: {sampled_variables['position']}, Key: {sampled_variables['key']}"
+    )
 
 
 def main():
