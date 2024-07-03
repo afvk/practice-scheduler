@@ -35,3 +35,4 @@ Options:
     - Problem: certain standards or keys might be much more difficult than others
 - Instance, e.g. "Improvise over Nardis in Gb at 120bpm." 
     - Problem: not clear what to do when template is extended, e.g. to "Improvide over Nardis in Gb at 120bpm with continuous eight note lines."
+- Somehow combine scores of both the template and its variables. 
