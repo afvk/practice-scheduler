@@ -3,6 +3,15 @@ import json
 import random
 from pathlib import Path
 
+import numpy as np
+from scipy.special import softmax
+
+from spaced_repetition import update_easiness
+
+SOFTMAX_TEMP = 20
+SCORES_FILE = Path("./scores.json")
+SCORE_QUERY = "Rank how well the exercise went from 0 to 5 (inclusive): "
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -22,14 +31,28 @@ def load_variables(path):
         return json.load(f)
 
 
-def load_exercise(path):
+def load_scores():
+    if SCORES_FILE.exists():
+        with open(SCORES_FILE) as f:
+            return json.load(f)
+    else:
+        return {}
+
+
+def write_score(scores, updated_score, exercise):
+    scores.update({exercise: updated_score})
+
+    with open(SCORES_FILE, "w") as f:
+        return json.dump(scores, f, indent=2)
+
+
+def load_exercises(path):
     exercises = []
     with open(path) as fp:
         for line in fp:
             exercises.append(line.strip())
 
-    exercise = random.sample(exercises, 1)[0]
-    return exercise
+    return exercises
 
 
 def fill_template(exercise, variables):
@@ -45,9 +68,23 @@ def main():
     args = parse_args()
 
     variables = load_variables(args.variables)
-    exercise = load_exercise(args.exercises)
+    exercises = load_exercises(args.exercises)
+    scores = load_scores()
+
+    probs = softmax(
+        [1 / (scores.get(exercise, 2.5) / SOFTMAX_TEMP) for exercise in exercises]
+    )
+
+    i_sampled = np.random.choice(len(probs), p=probs)
+    exercise = exercises[i_sampled]
+    score = scores.get(exercise, 2.5)
 
     fill_template(exercise, variables)
+    q = int(input(SCORE_QUERY))
+
+    updated_score = update_easiness(q, score)
+
+    write_score(scores, updated_score, exercise)
 
 
 if __name__ == "__main__":
