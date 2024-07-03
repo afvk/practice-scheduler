@@ -3,8 +3,6 @@ import json
 import random
 from pathlib import Path
 
-import pandas as pd
-
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -20,61 +18,30 @@ def load_variables(path):
         return json.load(f)
 
 
-def load_exercises(path):
+def load_exercise(path):
     exercises = []
     with open(path) as fp:
         for line in fp:
-            exercises.append(
-                {"exercise": line.strip(), "type": "improvisation",}  # TODO: remove
-            )
-    exercises = pd.DataFrame(exercises)
-    exercises = exercises.groupby("type").sample().sample(1)
-    return exercises
+            exercises.append(line.strip())
+
+    exercise = random.sample(exercises, 1)[0]
+    return exercise
 
 
-def load_repertoire(path):
-    with open(path) as f:
-        return [standard.strip() for standard in f.readlines()]
+def fill_template(exercise, variables):
+    sampled_variables = {key: random.choice(value) for key, value in variables.items()}
+    exercise = exercise.format(**sampled_variables)
 
-
-def sample_exercises(exercises, variables):
-
-    exercises["exercise"] = exercises["exercise"].apply(
-        lambda x: x.format(
-            bars_improv=random.choice(variables["bars_improv"]),
-            chord_tone=random.choice(variables["chord_tone"]),
-            up_down=random.choice(variables["up_down"]),
-            direction=random.choice(variables["direction"]),
-            string_set=random.choice(variables["string_set"]),
-            drop2_string_set=random.choice(variables["drop2_string_set"]),
-            drop3_string_set=random.choice(variables["drop3_string_set"]),
-            standard=random.choice(variables["standard"]),
-            scale=random.choice(variables["scale"]),
-            solo=random.choice(variables["solo"]),
-            connection_type=random.choice(variables["connection_type"]),
-            another_standard=random.choice(variables["standard"]),
-        )
-    )
-    exercises["position"] = [
-        random.choice(variables["position"]) for _ in range(len(exercises))
-    ]
-    exercises["key"] = [random.choice(variables["key"]) for _ in range(len(exercises))]
-    return exercises
-
-
-def display_table(exercises):
-    print(exercises[["type", "exercise", "position", "key"]].to_markdown(index=False))
+    print(f"{exercise} - Position: {sampled_variables['position']}, Key: {sampled_variables['key']}")
 
 
 def main():
     args = parse_args()
 
     variables = load_variables(args.variables)
-    exercises = load_exercises(args.exercises)
+    exercise = load_exercise(args.exercises)
 
-    practice = sample_exercises(exercises, variables)
-
-    display_table(practice)
+    fill_template(exercise, variables)
 
 
 if __name__ == "__main__":
