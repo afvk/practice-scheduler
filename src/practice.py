@@ -11,7 +11,6 @@ def parse_args():
 
     parser.add_argument("--variables", "-v", type=Path, default="examples/jazz-guitar/variables.json")
     parser.add_argument("--exercises", "-e", type=Path, default="examples/jazz-guitar/exercises.tsv")
-    parser.add_argument("--solos", "-s", type=Path, default="examples/jazz-guitar/solos.txt")
     parser.add_argument("--repertoire", "-r", type=Path, default="examples/jazz-guitar/repertoire.txt")
 
     return parser.parse_args()
@@ -34,22 +33,12 @@ def load_exercises(path):
     return exercises
 
 
-def load_solos(path):
-
-    with open(path) as f:
-        solos = []
-        for solo in f.readlines():
-            standard, link = solo.strip().split("\t")
-            solos.append(f"{standard} ({link})")
-    return solos
-
-
 def load_repertoire(path):
     with open(path) as f:
         return [standard.strip() for standard in f.readlines()]
 
 
-def sample_exercises(exercises, standards, solos, variables):
+def sample_exercises(exercises, standards, variables):
 
     exercises["exercise"] = exercises["exercise"].apply(
         lambda x: x.format(
@@ -62,7 +51,7 @@ def sample_exercises(exercises, standards, solos, variables):
             drop3_string_set=random.choice(variables["drop3_string_set"]),
             standard=random.choice(standards),
             scale=random.choice(variables["scale"]),
-            solo=random.choice(solos),
+            solo=random.choice(variables["solo"]),
             connection_type=random.choice(variables["connection_type"]),
             another_standard=random.choice(standards),
         )
@@ -83,10 +72,9 @@ def main():
 
     variables = load_variables(args.variables)
     exercises = load_exercises(args.exercises)
-    solos = load_solos(args.solos)
     standards = load_repertoire(args.repertoire)
 
-    practice = sample_exercises(exercises, standards, solos, variables)
+    practice = sample_exercises(exercises, standards, variables)
 
     display_table(practice)
 
