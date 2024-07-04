@@ -81,11 +81,13 @@ def write_score(scores, updated_score, exercise):
 
 def fill_template(exercise, variables):
     """Fill the exercise template with sampled variables."""
-    sampled_variables = {key: random.choice(value) for key, value in variables.items()}
-    exercise = exercise.format(**sampled_variables)
+    sampled_local = {key: random.choice(value) for key, value in variables['local'].items()}
+    exercise = exercise.format(**sampled_local)
+
+    sampled_global = ', '.join([f'{key}: {random.choice(value)}' for key, value in variables['global'].items()])
 
     print(
-        f"{exercise} - Position: {sampled_variables['position']}, Key: {sampled_variables['key']}"
+        f"{exercise} - {sampled_global}"
     )
 
 
