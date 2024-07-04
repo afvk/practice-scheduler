@@ -64,6 +64,19 @@ def fill_template(exercise, variables):
     )
 
 
+def get_user_score():
+    """Get the score from the user input."""
+    while True:
+        try:
+            score = int(input(SCORE_QUERY))
+            if score in range(1, 6):
+                return score
+            else:
+                print("Please enter a score between 0 and 5.")
+        except ValueError:
+            print("Invalid input. Please enter an integer between 0 and 5.")
+
+
 def main():
     args = parse_args()
 
@@ -80,7 +93,7 @@ def main():
     score = scores.get(exercise, 2.5)
 
     fill_template(exercise, variables)
-    q = int(input(SCORE_QUERY))
+    q = get_user_score()
 
     updated_score = update_easiness(q, score)
 
