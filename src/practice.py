@@ -64,6 +64,13 @@ def fill_template(exercise, variables):
     )
 
 
+def sample_exercise(exercises, scores):
+    """Sample an exercise based on scores and softmax probabilities."""
+    probs = softmax([1 / (scores.get(exercise, 2.5) / SOFTMAX_TEMP) for exercise in exercises])
+    i_sampled = np.random.choice(len(probs), p=probs)
+    return exercises[i_sampled]
+
+
 def get_user_score():
     """Get the score from the user input."""
     while True:
@@ -84,12 +91,7 @@ def main():
     exercises = load_exercises(args.exercises)
     scores = load_scores()
 
-    probs = softmax(
-        [1 / (scores.get(exercise, 2.5) / SOFTMAX_TEMP) for exercise in exercises]
-    )
-
-    i_sampled = np.random.choice(len(probs), p=probs)
-    exercise = exercises[i_sampled]
+    exercise = sample_exercise(exercises, scores)
     score = scores.get(exercise, 2.5)
 
     fill_template(exercise, variables)
