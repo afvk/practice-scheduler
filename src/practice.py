@@ -14,6 +14,7 @@ SCORE_QUERY = "Rank how well the exercise went from 0 to 5 (inclusive): "
 
 
 def parse_args():
+    """Parse command-line arguments."""
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -27,11 +28,13 @@ def parse_args():
 
 
 def load_variables(path):
+    """Load variables from a JSON file."""
     with open(path) as f:
         return json.load(f)
 
 
 def load_scores():
+    """Load cores from a JSON file."""
     if SCORES_FILE.exists():
         with open(SCORES_FILE) as f:
             return json.load(f)
@@ -40,6 +43,7 @@ def load_scores():
 
 
 def write_score(scores, updated_score, exercise):
+    """Write scores to a JSON file."""
     scores.update({exercise: updated_score})
 
     with open(SCORES_FILE, "w") as f:
@@ -47,6 +51,7 @@ def write_score(scores, updated_score, exercise):
 
 
 def load_exercises(path):
+    """Load exercises from a TSV file."""
     exercises = []
     with open(path) as fp:
         for line in fp:
@@ -56,6 +61,7 @@ def load_exercises(path):
 
 
 def fill_template(exercise, variables):
+    """Fill the exercise template with sampled variables."""
     sampled_variables = {key: random.choice(value) for key, value in variables.items()}
     exercise = exercise.format(**sampled_variables)
 
