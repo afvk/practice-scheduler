@@ -8,7 +8,7 @@ from scipy.special import softmax
 
 from spaced_repetition import update_easiness
 
-SOFTMAX_TEMP = 20
+DEFAULT_TEMP=20
 SCORES_FILE = Path("./scores.json")
 SCORE_QUERY = "Rank how well the exercise went from 0 to 5 (inclusive): "
 
@@ -23,8 +23,40 @@ def parse_args():
     parser.add_argument(
         "--exercises", "-e", type=Path, default="examples/jazz-guitar/exercises.tsv"
     )
-
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--softmax-temp",
+        type=float,
+        help="""Softmax temperature used when sampling an exercise based on the
+             easiness scores. Values close to zero correspond to sampling from a
+             uniform distribution, ignoring the scores. High values correspond
+             to always picking the most difficult exercise.""",
+        default=DEFAULT_TEMP,
+    )
+    group.add_argument(
+        "--sampling-strategy", choices=["random", "default", "pick-hardest"]
+    )
     return parser.parse_args()
+
+
+def get_softmax_temp(args):
+    if args.softmax_temp:
+        return args.softmax_temp
+
+    else:
+        if args.sampling_strategy == "random":
+            return 1e-6
+
+        elif args.sampling_strategy == "default":
+            return DEFAULT_TEMP
+
+        elif args.sampling_strategy == "pick-hardest":
+            return 1e6
+
+        else:
+            raise ValueError(
+                f"Sampling strategy {args.sampling_strategy} not supported."
+            )
 
 
 def load_variables(path):
@@ -70,9 +102,11 @@ def fill_template(exercise, variables):
     )
 
 
-def sample_exercise(exercises, scores):
+def sample_exercise(exercises, scores, softmax_temp):
     """Sample an exercise based on scores and softmax probabilities."""
-    probs = softmax([1 / (scores.get(exercise, 2.5) / SOFTMAX_TEMP) for exercise in exercises])
+    probs = softmax(
+        [1 / (scores.get(exercise, 2.5) / softmax_temp) for exercise in exercises]
+    )
     i_sampled = np.random.choice(len(probs), p=probs)
     return exercises[i_sampled]
 
@@ -93,11 +127,13 @@ def get_user_score():
 def main():
     args = parse_args()
 
+    softmax_temp = get_softmax_temp(args)
+
     variables = load_variables(args.variables)
     exercises = load_exercises(args.exercises)
     scores = load_scores()
 
-    exercise = sample_exercise(exercises, scores)
+    exercise = sample_exercise(exercises, scores, softmax_temp)
     score = scores.get(exercise, 2.5)
 
     fill_template(exercise, variables)
