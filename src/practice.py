@@ -18,10 +18,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--variables", "-v", type=Path, default="examples/jazz-guitar/variables.json"
-    )
-    parser.add_argument(
-        "--exercises", "-e", type=Path, default="examples/jazz-guitar/exercises.tsv"
+        "--variables", "-v", type=Path, default="examples/jazz-guitar.json"
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
@@ -59,8 +56,8 @@ def get_softmax_temp(args):
             )
 
 
-def load_variables(path):
-    """Load variables from a JSON file."""
+def load_skill_data(path):
+    """Load exercise and variables from a JSON file."""
     with open(path) as f:
         return json.load(f)
 
@@ -80,16 +77,6 @@ def write_score(scores, updated_score, exercise):
 
     with open(SCORES_FILE, "w") as f:
         return json.dump(scores, f, indent=2)
-
-
-def load_exercises(path):
-    """Load exercises from a TSV file."""
-    exercises = []
-    with open(path) as fp:
-        for line in fp:
-            exercises.append(line.strip())
-
-    return exercises
 
 
 def fill_template(exercise, variables):
@@ -129,14 +116,13 @@ def main():
 
     softmax_temp = get_softmax_temp(args)
 
-    variables = load_variables(args.variables)
-    exercises = load_exercises(args.exercises)
+    skill_data = load_skill_data(args.variables)
     scores = load_scores()
 
-    exercise = sample_exercise(exercises, scores, softmax_temp)
+    exercise = sample_exercise(skill_data['exercises'], scores, softmax_temp)
     score = scores.get(exercise, 2.5)
 
-    fill_template(exercise, variables)
+    fill_template(exercise, skill_data['variables'])
     q = get_user_score()
 
     updated_score = update_easiness(q, score)
