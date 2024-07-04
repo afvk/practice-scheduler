@@ -8,7 +8,7 @@ from scipy.special import softmax
 
 from spaced_repetition import update_easiness
 
-DEFAULT_TEMP=20
+DEFAULT_TEMP = 20
 SCORES_FILE = Path("./scores.json")
 SCORE_QUERY = "Rank how well the exercise went from 0 to 5 (inclusive): "
 
@@ -81,14 +81,16 @@ def write_score(scores, updated_score, exercise):
 
 def fill_template(exercise, variables):
     """Fill the exercise template with sampled variables."""
-    sampled_local = {key: random.choice(value) for key, value in variables['local'].items()}
+    sampled_local = {
+        key: random.choice(value) for key, value in variables["local"].items()
+    }
     exercise = exercise.format(**sampled_local)
 
-    sampled_global = ', '.join([f'{key}: {random.choice(value)}' for key, value in variables['global'].items()])
-
-    print(
-        f"{exercise} - {sampled_global}"
+    sampled_global = ", ".join(
+        [f"{key}: {random.choice(value)}" for key, value in variables["global"].items()]
     )
+
+    print(f"{exercise} - {sampled_global}")
 
 
 def sample_exercise(exercises, scores, softmax_temp):
@@ -112,7 +114,7 @@ def get_user_score():
 
 
 def add_default_scores(scores, skill_data):
-    return np.array([scores.get(exercise, 2.5) for exercise in skill_data['exercises']])
+    return np.array([scores.get(exercise, 2.5) for exercise in skill_data["exercises"]])
 
 
 def main():
@@ -124,9 +126,9 @@ def main():
     scores_data = load_scores()
     scores = add_default_scores(scores_data, skill_data)
 
-    exercise, score = sample_exercise(skill_data['exercises'], scores, softmax_temp)
+    exercise, score = sample_exercise(skill_data["exercises"], scores, softmax_temp)
 
-    fill_template(exercise, skill_data['variables'])
+    fill_template(exercise, skill_data["variables"])
     q = get_user_score()
 
     updated_score = update_easiness(q, score)
