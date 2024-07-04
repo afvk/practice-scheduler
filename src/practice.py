@@ -93,11 +93,9 @@ def fill_template(exercise, variables):
 
 def sample_exercise(exercises, scores, softmax_temp):
     """Sample an exercise based on scores and softmax probabilities."""
-    probs = softmax(
-        [1 / (scores.get(exercise, 2.5) / softmax_temp) for exercise in exercises]
-    )
+    probs = softmax(1 / (scores / softmax_temp))
     i_sampled = np.random.choice(len(probs), p=probs)
-    return exercises[i_sampled]
+    return exercises[i_sampled], scores[i_sampled]
 
 
 def get_user_score():
@@ -113,23 +111,27 @@ def get_user_score():
             print("Invalid input. Please enter an integer between 0 and 5.")
 
 
+def add_default_scores(scores, skill_data):
+    return np.array([scores.get(exercise, 2.5) for exercise in skill_data['exercises']])
+
+
 def main():
     args = parse_args()
 
     softmax_temp = get_softmax_temp(args)
 
     skill_data = load_skill_data(args.variables)
-    scores = load_scores()
+    scores_data = load_scores()
+    scores = add_default_scores(scores_data, skill_data)
 
-    exercise = sample_exercise(skill_data['exercises'], scores, softmax_temp)
-    score = scores.get(exercise, 2.5)
+    exercise, score = sample_exercise(skill_data['exercises'], scores, softmax_temp)
 
     fill_template(exercise, skill_data['variables'])
     q = get_user_score()
 
     updated_score = update_easiness(q, score)
 
-    write_score(scores, updated_score, exercise)
+    write_score(scores_data, updated_score, exercise)
 
 
 if __name__ == "__main__":
