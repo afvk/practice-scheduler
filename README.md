@@ -15,7 +15,7 @@ Getting good at something requires deliberate practice. However, we often get to
 - ...
 
 ## What problems does this solve?
-- Only practicing what you know well already
+- Only practicing stuff you know well already
 - Watching some Jens Larsen video with a useful exercise, doing it for 20 minutes, then never coming back to it
 - Not having a structured way of maintaining your repertoire
 
@@ -31,8 +31,11 @@ Getting good at something requires deliberate practice. However, we often get to
 
 ### For spaced repetition, what is a card?
 Options:
-- Template, e.g. "Improvise over {{standard}} in {{key}} at {{tempo}}."
-    - Problem: certain standards or keys might be much more difficult than others
+- Template, e.g. "Improvise over {standard} in {key} at {tempo}."
+    - Problem: certain standards or keys are more difficult than others
+        - Potential solution: give scores (e.g. SM2 easiness factor) to templates and variables individually, then do weighted sampling based on scores
 - Instance, e.g. "Improvise over Nardis in Gb at 120bpm." 
-    - Problem: not clear what to do when template is extended, e.g. to "Improvide over Nardis in Gb at 120bpm with continuous eight note lines."
+    - Problems: 
+        - not clear what to do when template is extended, e.g. to "Improvise over Nardis in Gb at 120bpm with continuous eight note lines."
+        - number of combinations is extremely large
 - Somehow combine scores of both the template and its variables. 
