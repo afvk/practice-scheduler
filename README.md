@@ -25,7 +25,8 @@ Getting good at something requires deliberate practice. However, we often get to
 - [ ] Add prioritization modes, e.g. random, spaced repetition, time-based, etc.
 - [ ] Make it a CLI command, e.g. "practice-scheduler practice", "practice-scheduler add exercise ...", etc.
 - [ ] Verify inputs, e.g. make sure that all variables mentioned in exercises actually exist. 
-- [ ] Add tempo variable, make position variable optional. In general, handle exercise-specific and general variables. 
+- [ ] Add tempo variable, make position variable optional. In general, handle exercise-specific and general variables.
+- [ ] Introduce "skill" abstraction, e.g. "jazz-guitar", "jazz-trumpet"
 
 ## Thoughts
 
