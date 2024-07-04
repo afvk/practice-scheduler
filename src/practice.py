@@ -94,7 +94,7 @@ def fill_template(exercise, variables):
 
 
 def sample_exercise(exercises, scores, softmax_temp):
-    """Sample an exercise based on scores and softmax probabilities."""
+    """Sample an exercise based on scores and softmax temperature."""
     probs = softmax(1 / (scores / softmax_temp))
     i_sampled = np.random.choice(len(probs), p=probs)
     return exercises[i_sampled], scores[i_sampled]
