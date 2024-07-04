@@ -116,7 +116,7 @@ def get_user_score():
     while True:
         try:
             score = int(input(SCORE_QUERY))
-            if score in range(1, 6):
+            if score in range(0, 6):
                 return score
             else:
                 print("Please enter a score between 0 and 5.")
