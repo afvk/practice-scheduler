@@ -93,11 +93,11 @@ def fill_template(exercise, variables):
     print(f"{exercise} - {sampled_global}")
 
 
-def sample_exercise(exercises, scores, softmax_temp):
+def sample_weighted(scores, softmax_temp):
     """Sample an exercise based on scores and softmax temperature."""
     probs = softmax(1 / (scores / softmax_temp))
     i_sampled = np.random.choice(len(probs), p=probs)
-    return exercises[i_sampled], scores[i_sampled]
+    return i_sampled
 
 
 def get_user_score():
@@ -126,7 +126,10 @@ def main():
     scores_data = load_scores()
     scores = add_default_scores(scores_data, skill_data)
 
-    exercise, score = sample_exercise(skill_data["exercises"], scores, softmax_temp)
+    i_sampled = sample_weighted(scores, softmax_temp)
+    
+    exercise = skill_data["exercises"][i_sampled]
+    score = scores[i_sampled]
 
     fill_template(exercise, skill_data["variables"])
     q = get_user_score()
