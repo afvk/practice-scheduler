@@ -1,6 +1,7 @@
 import argparse
 import json
 import random
+import re
 from pathlib import Path
 
 import numpy as np
@@ -8,9 +9,9 @@ from scipy.special import softmax
 
 from spaced_repetition import update_easiness
 
-DEFAULT_TEMP = 20
+DEFAULT_TEMP = 40
 SCORES_FILE = Path("./scores.json")
-SCORE_QUERY = "Rank how well the exercise went from 0 to 5 (inclusive): "
+SCORE_QUERY = "Rate the easiness from 0 (very difficult) to 5 (very easy): "
 
 
 def parse_args():
@@ -68,26 +69,30 @@ def load_scores():
         with open(SCORES_FILE) as f:
             return json.load(f)
     else:
-        return {}
+        return {"exercises": {}, "variables": {"local": {}, "global": {},}}
 
 
 def write_score(scores, updated_score, exercise):
     """Write scores to a JSON file."""
-    scores.update({exercise: updated_score})
+    scores["exercises"].update({exercise: updated_score})
 
     with open(SCORES_FILE, "w") as f:
         return json.dump(scores, f, indent=2)
 
 
-def fill_template(exercise, variables):
+def fill_template(exercise, data, sample_inds):
     """Fill the exercise template with sampled variables."""
     sampled_local = {
-        key: random.choice(value) for key, value in variables["local"].items()
+        var: instances[sample_inds[var]]
+        for var, instances in data["variables"]["local"].items()
     }
     exercise = exercise.format(**sampled_local)
 
     sampled_global = ", ".join(
-        [f"{key}: {random.choice(value)}" for key, value in variables["global"].items()]
+        [
+            f"{var}: {instances[sample_inds[var]]}"
+            for var, instances in data["variables"]["global"].items()
+        ]
     )
 
     print(f"{exercise} - {sampled_global}")
@@ -113,8 +118,31 @@ def get_user_score():
             print("Invalid input. Please enter an integer between 0 and 5.")
 
 
-def add_default_scores(scores, skill_data):
-    return np.array([scores.get(exercise, 2.5) for exercise in skill_data["exercises"]])
+def add_default_scores(scores, data):
+    scores["exercises"] = {
+        exercise: scores["exercises"].get(exercise, 2.5)
+        for exercise in data["exercises"]
+    }
+    for var_type in ["local", "global"]:
+        for var, instances in data["variables"][var_type].items():
+            if var not in scores["variables"][var_type]:
+                scores["variables"][var_type][var] = {}
+            for inst in instances:
+                if inst not in scores["variables"][var_type][var]:
+                    scores["variables"][var_type][var][inst] = 2.5
+
+    return scores
+
+
+def sample_variables(scores, softmax_temp):
+    sample_inds = {}
+    for var_type in ["local", "global"]:
+        for var, instances in scores["variables"][var_type].items():
+            i_sampled = sample_weighted(
+                np.array(list(instances.values())), softmax_temp
+            )
+            sample_inds[var] = i_sampled
+    return sample_inds
 
 
 def main():
@@ -125,16 +153,34 @@ def main():
     skill_data = load_skill_data(args.variables)
     scores_data = load_scores()
     scores = add_default_scores(scores_data, skill_data)
+    i_sampled = sample_weighted(
+        np.array(list(scores["exercises"].values())), softmax_temp
+    )
+    sample_inds = sample_variables(scores, softmax_temp)
 
-    i_sampled = sample_weighted(scores, softmax_temp)
-    
     exercise = skill_data["exercises"][i_sampled]
-    score = scores[i_sampled]
+    score = scores["exercises"][exercise]
 
-    fill_template(exercise, skill_data["variables"])
+    fill_template(exercise, skill_data, sample_inds)
     q = get_user_score()
-
     updated_score = update_easiness(q, score)
+
+    used_vars = {
+        'local': re.findall(r"\{(.*?)\}", exercise),
+        'global': skill_data["variables"]["global"],
+    }
+
+    for var_type, vars in used_vars.items():
+        for var in vars:
+            i = sample_inds[var]
+            sampled_inst = skill_data["variables"][var_type][var][i]
+            score = scores["variables"][var_type][var][sampled_inst]
+
+            print(f"How easy was {sampled_inst}?")
+            q = get_user_score()
+            updated_score = update_easiness(q, score)
+
+            scores["variables"][var_type][var][sampled_inst] = updated_score
 
     write_score(scores_data, updated_score, exercise)
 
